@@ -11,6 +11,8 @@ import (
 	"sync/atomic"
 )
 
+type DialFunc func(network string, addr string) (net.Conn, error)
+
 // The basic proxy type. Implements http.Handler.
 type ProxyHttpServer struct {
 	// session variable must be aligned in i386
@@ -26,7 +28,7 @@ type ProxyHttpServer struct {
 	Tr              *http.Transport
 	// ConnectDial will be used to create TCP connections for CONNECT requests
 	// if nil Tr.Dial will be used
-	ConnectDial func(network string, addr string) (net.Conn, error)
+	ConnectDial DialFunc
 }
 
 var hasPort = regexp.MustCompile(`:\d+$`)

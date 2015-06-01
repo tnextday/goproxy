@@ -90,7 +90,7 @@ func (proxy *ProxyHttpServer) handleHttps(w http.ResponseWriter, r *http.Request
 		if !hasPort.MatchString(host) {
 			host += ":80"
 		}
-		targetSiteCon, err := proxy.connectDial("tcp", host)
+		targetSiteCon, err := ctx.ConnectDial("tcp", host)
 		if err != nil {
 			httpError(proxyClient, ctx, err)
 			return
@@ -106,7 +106,7 @@ func (proxy *ProxyHttpServer) handleHttps(w http.ResponseWriter, r *http.Request
 	case ConnectHTTPMitm:
 		proxyClient.Write([]byte("HTTP/1.0 200 OK\r\n\r\n"))
 		ctx.Logf("Assuming CONNECT is plain HTTP tunneling, mitm proxying it")
-		targetSiteCon, err := proxy.connectDial("tcp", host)
+		targetSiteCon, err := ctx.ConnectDial("tcp", host)
 		if err != nil {
 			ctx.Warnf("Error dialing to %s: %s", host, err.Error())
 			return
@@ -270,7 +270,7 @@ func dialerFromEnv(proxy *ProxyHttpServer) func(network, addr string) (net.Conn,
 	return proxy.NewConnectDialToProxy(https_proxy)
 }
 
-func (proxy *ProxyHttpServer) NewConnectDialToProxy(https_proxy string) func(network, addr string) (net.Conn, error) {
+func (proxy *ProxyHttpServer) NewConnectDialToProxy(https_proxy string) DialFunc {
 	u, err := url.Parse(https_proxy)
 	if err != nil {
 		return nil
