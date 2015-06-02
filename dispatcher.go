@@ -97,15 +97,14 @@ func ReqHostIs(hosts ...string) ReqConditionFunc {
 	}
 }
 
-var localHostIpv4 = regexp.MustCompile(`127\.0\.0\.\d+`)
+var localHostIpv4 = regexp.MustCompile(`^(127[\.\d]*|localhost):*\d*$`)
 
 // IsLocalHost checks whether the destination host is explicitly local host
 // (buggy, there can be IPv6 addresses it doesn't catch)
 var IsLocalHost ReqConditionFunc = func(req *http.Request, ctx *ProxyCtx) bool {
 	return req.URL.Host == "::1" ||
 		req.URL.Host == "0:0:0:0:0:0:0:1" ||
-		localHostIpv4.MatchString(req.URL.Host) ||
-		req.URL.Host == "localhost"
+		localHostIpv4.MatchString(req.URL.Host)
 }
 
 // UrlMatches returns a ReqCondition testing whether the destination URL
